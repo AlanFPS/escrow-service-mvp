@@ -22,7 +22,7 @@ module.exports = {
         }),
       network_id: 11155111, // Sepolia's network id
       gas: 3000000, // 3,000,000 gas
-      gasPrice: 200000000000, // 200 Gwei
+      gasPrice: 30000000000, // 30 Gwei
       confirmations: 2, // # of confirmations to wait between deployments
       timeoutBlocks: 200, // # of blocks before a deployment times out
       skipDryRun: true, // Skip dry run before migrations
@@ -33,11 +33,11 @@ module.exports = {
 
   compilers: {
     solc: {
-      version: "0.8.2",
+      version: "0.8.17", // Updated from 0.8.2
       settings: {
         optimizer: {
           enabled: true, // Enable optimizer
-          runs: 200,
+          runs: 1, // Optimized for deployment cost
         },
         evmVersion: "istanbul",
       },

@@ -16,6 +16,24 @@ module.exports = async function (callback) {
     console.log("Seller Address:", seller);
     console.log("Arbitrator Address:", arbitrator);
 
+    // Fetch and display balances
+    const buyerBalance = web3.utils.fromWei(
+      await web3.eth.getBalance(buyer),
+      "ether"
+    );
+    const sellerBalance = web3.utils.fromWei(
+      await web3.eth.getBalance(seller),
+      "ether"
+    );
+    const arbitratorBalance = web3.utils.fromWei(
+      await web3.eth.getBalance(arbitrator),
+      "ether"
+    );
+
+    console.log(`Buyer Balance: ${buyerBalance} ETH`);
+    console.log(`Seller Balance: ${sellerBalance} ETH`);
+    console.log(`Arbitrator Balance: ${arbitratorBalance} ETH`);
+
     // Step 1: Fetch buyer's balance before transaction
     const initialBuyerBalance = web3.utils.toBN(
       await web3.eth.getBalance(buyer)
@@ -26,26 +44,16 @@ module.exports = async function (callback) {
       "ETH"
     );
 
-    // Monitor Current Gas Prices
-    const latestBlock = await web3.eth.getBlock("latest");
-    const baseFeePerGas = web3.utils.toBN(latestBlock.baseFeePerGas || 0);
+    // Set fixed gas price (same as in truffle-config.js)
+    const gasPrice = web3.utils.toBN(web3.utils.toWei("30", "gwei"));
     console.log(
-      "Current Base Fee:",
-      web3.utils.fromWei(baseFeePerGas, "gwei"),
+      "Using Gas Price:",
+      web3.utils.fromWei(gasPrice, "gwei"),
       "Gwei"
     );
 
-    // Set max priority fee per gas (tip for miners)
-    const maxPriorityFeePerGas = web3.utils.toBN(web3.utils.toWei("2", "gwei"));
-    const maxFeePerGas = baseFeePerGas.add(maxPriorityFeePerGas);
-    console.log(
-      "Calculated Max Fee Per Gas:",
-      web3.utils.fromWei(maxFeePerGas, "gwei"),
-      "Gwei"
-    );
-
-    // Transaction Value
-    const escrowValue = web3.utils.toWei("1", "ether"); // Adjust as needed
+    // Transaction Value (Adjusted to 0.05 ETH)
+    const escrowValue = web3.utils.toWei("0.05", "ether"); // Adjusted value
 
     // Step 2: Estimate gas for createEscrow
     let gasEstimateCreateEscrow = await instance.createEscrow.estimateGas(
@@ -62,7 +70,7 @@ module.exports = async function (callback) {
     gasEstimateCreateEscrow = Math.round(gasEstimateCreateEscrow * 1.5);
 
     // Calculate estimated total cost
-    const estimatedGasCost = maxFeePerGas.mul(
+    const estimatedGasCost = gasPrice.mul(
       web3.utils.toBN(gasEstimateCreateEscrow)
     );
     const estimatedTotalCost = web3.utils
@@ -88,9 +96,8 @@ module.exports = async function (callback) {
       );
     }
 
-    // Convert gas fee parameters to strings for transaction options
-    const maxFeePerGasStr = maxFeePerGas.toString();
-    const maxPriorityFeePerGasStr = maxPriorityFeePerGas.toString();
+    // Convert gas price to string for transaction options
+    const gasPriceStr = gasPrice.toString();
 
     // Sending createEscrow transaction
     console.log("Sending createEscrow transaction...");
@@ -98,8 +105,7 @@ module.exports = async function (callback) {
       from: buyer,
       value: escrowValue,
       gas: gasEstimateCreateEscrow,
-      maxFeePerGas: maxFeePerGasStr,
-      maxPriorityFeePerGas: maxPriorityFeePerGasStr,
+      gasPrice: gasPriceStr,
     });
     console.log("Escrow transaction hash:", txCreateEscrow.tx);
 
@@ -118,17 +124,43 @@ module.exports = async function (callback) {
     // Add a buffer to the gas estimate (e.g., 50%)
     gasEstimateResolveDispute = Math.round(gasEstimateResolveDispute * 1.5);
 
-    // Step 3: Arbitrator resolves dispute in favor of buyer
+    // Calculate arbitrator's estimated gas cost
+    const arbitratorGasCost = gasPrice.mul(
+      web3.utils.toBN(gasEstimateResolveDispute)
+    );
+
+    console.log(
+      "Arbitrator's Estimated Gas Cost:",
+      web3.utils.fromWei(arbitratorGasCost, "ether"),
+      "ETH"
+    );
+
+    // Check if arbitrator has enough balance
+    const arbitratorBalanceBN = web3.utils.toBN(
+      await web3.eth.getBalance(arbitrator)
+    );
+    if (arbitratorBalanceBN.lt(arbitratorGasCost)) {
+      throw new Error(
+        `Arbitrator does not have enough balance. Required: ${web3.utils.fromWei(
+          arbitratorGasCost,
+          "ether"
+        )} ETH, Available: ${web3.utils.fromWei(
+          arbitratorBalanceBN,
+          "ether"
+        )} ETH`
+      );
+    }
+
+    // Step 4: Arbitrator resolves dispute in favor of buyer
     console.log("Sending resolveDispute transaction...");
     const receipt = await instance.resolveDispute(escrowId, false, {
       from: arbitrator,
       gas: gasEstimateResolveDispute,
-      maxFeePerGas: maxFeePerGasStr,
-      maxPriorityFeePerGas: maxPriorityFeePerGasStr,
+      gasPrice: gasPriceStr,
     });
     console.log("Dispute resolution transaction hash:", receipt.tx);
 
-    // Step 4: Capture buyer's balance after the dispute
+    // Step 5: Capture buyer's balance after the dispute
     const updatedBuyerBalance = web3.utils.toBN(
       await web3.eth.getBalance(buyer)
     );
@@ -138,7 +170,7 @@ module.exports = async function (callback) {
       "ETH"
     );
 
-    // Step 5: Calculate the refund amount received by the buyer (after gas fees)
+    // Step 6: Calculate the refund amount received by the buyer (after gas fees)
     const disputeRefundAmount = updatedBuyerBalance.sub(initialBuyerBalance);
     const gasUsed = web3.utils.toBN(receipt.receipt.gasUsed);
     const effectiveGasPrice = web3.utils.toBN(
@@ -146,7 +178,7 @@ module.exports = async function (callback) {
     );
     const gasCost = gasUsed.mul(effectiveGasPrice);
 
-    // Step 6: Log the amount received
+    // Step 7: Log the amount received
     console.log(
       "Refund Amount Received by Buyer (Before Gas Fees):",
       web3.utils.fromWei(disputeRefundAmount.add(gasCost), "ether"),
@@ -158,7 +190,7 @@ module.exports = async function (callback) {
       "ETH"
     );
 
-    // Step 7: Check the escrow status after dispute resolution
+    // Step 8: Check the escrow status after dispute resolution
     const escrowDetails = await instance.escrows(escrowId);
     console.log(
       "Escrow Status after Dispute Resolution:",
