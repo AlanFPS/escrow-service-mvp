@@ -1,0 +1,108 @@
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 200px;
+  min-width: 60px;
+  height: 100%;
+  background-color: #2f4050;
+  color: #fff;
+  transition: width 0.3s, min-width 0.3s;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.sidebar.collapsed {
+  width: 60px; /* Fixed missing width property */
+}
+
+/* Sidebar Header */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px;
+}
+
+.sidebar.collapsed .sidebar-header {
+  flex-direction: column;
+  align-items: center;
+}
+
+.sidebar.collapsed .logo {
+  margin-bottom: 10px;
+}
+
+.sidebar.collapsed .toggle-btn {
+  margin-top: 10px;
+}
+
+.logo {
+  flex-grow: 1;
+  font-size: 1.5em;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.toggle-btn {
+  cursor: pointer;
+  font-size: 1.5em;
+}
+
+/* Menu */
+.menu {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+}
+
+.menu li {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s;
+}
+
+.menu li:hover,
+.menu li.active {
+  background-color: #1c2b36;
+}
+
+.menu li.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  background-color: #007bff;
+}
+
+.menu li svg {
+  font-size: 1.5em;
+  margin-right: 15px;
+  min-width: 20px;
+}
+
+.sidebar.collapsed .menu li {
+  justify-content: center;
+}
+
+.sidebar.collapsed .menu li svg {
+  margin-right: 0;
+}
+
+.sidebar.collapsed .menu li span {
+  display: none;
+}
+
+.menu li span {
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.sidebar.collapsed .logo {
+  text-align: center;
+}

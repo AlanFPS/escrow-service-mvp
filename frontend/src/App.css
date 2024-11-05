@@ -6,44 +6,76 @@
 }
 
 body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f6f9;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  background-color: #eef2f5;
   color: #333;
 }
 
 .container {
   width: 90%;
-  max-width: 800px;
+  max-width: 1000px;
   margin: 50px auto;
 }
 
 /* Header */
 .header {
-  text-align: center;
+  padding-left: 20px; /* Add this line */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 30px;
+}
+
+.header-content {
+  text-align: left;
 }
 
 .header h1 {
   margin-bottom: 10px;
+  font-size: 2em;
+}
+
+.header p {
+  font-size: 1.2em;
+}
+
+.header span {
+  color: #007bff;
 }
 
 /* Balance Section */
 .balance {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
+  flex-wrap: wrap;
   margin-bottom: 30px;
 }
 
 .balance-card {
   background-color: #fff;
   padding: 20px;
-  width: 45%;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 48%;
+  margin-bottom: 15px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s;
+}
+
+.balance-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .balance-card h2 {
   margin-bottom: 15px;
+  font-size: 1.5em;
+  color: #555;
+}
+
+.balance-card p {
+  font-size: 1.8em;
+  font-weight: bold;
+  color: #333;
 }
 
 /* Buttons */
@@ -58,8 +90,12 @@ body {
   font-size: 16px;
   cursor: pointer;
   border: none;
-  border-radius: 8px;
+  border-radius: 30px;
   color: #fff;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  transition: all 0.3s;
 }
 
 .send-btn {
@@ -70,17 +106,39 @@ body {
   background-color: #17a2b8;
 }
 
+.action-buttons button:after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: all 0.3s;
+  z-index: -1;
+}
+
+.action-buttons button:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.action-buttons button:hover:after {
+  left: 0;
+}
+
 /* Transaction Form */
 .transaction-form {
   background-color: #fff;
   padding: 20px;
-  border-radius: 8px;
-  /* display: none; */ /* No need to hide, React handles visibility */
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .transaction-form h2 {
   margin-bottom: 20px;
+  font-size: 1.8em;
+  color: #333;
 }
 
 .transaction-form .form-group {
@@ -91,14 +149,22 @@ body {
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
+  color: #555;
 }
 
 .transaction-form input,
 .transaction-form select {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 6px;
+  transition: border-color 0.3s;
+}
+
+.transaction-form input:focus,
+.transaction-form select:focus {
+  border-color: #007bff;
+  outline: none;
 }
 
 .transaction-form .submit-btn {
@@ -107,7 +173,122 @@ body {
   width: 100%;
   border: none;
   color: #fff;
-  font-size: 16px;
-  border-radius: 8px;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 30px;
   cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.transaction-form .submit-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Transaction History */
+.transaction-history {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.transaction-history h2 {
+  margin-bottom: 20px;
+  font-size: 1.8em;
+  color: #333;
+}
+
+.transaction-history table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.transaction-history th,
+.transaction-history td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.transaction-history th {
+  background-color: #f8f9fa;
+  color: #555;
+  font-weight: bold;
+}
+
+.transaction-history tr:hover {
+  background-color: #f1f1f1;
+}
+
+.transaction-history td {
+  font-size: 1em;
+  color: #333;
+}
+
+/* Notifications */
+.notifications {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.notifications h2 {
+  margin-bottom: 15px;
+  font-size: 1.8em;
+  color: #333;
+}
+
+.notifications p {
+  font-size: 1em;
+  color: #555;
+}
+
+/* Logout Button */
+.logout-btn {
+  background-color: #dc3545;
+  padding: 10px 20px;
+  border: none;
+  color: #fff;
+  font-size: 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.logout-btn:hover {
+  background-color: #c82333;
+}
+
+.app {
+  display: flex;
+}
+
+.main-content {
+  margin-left: 220px; /* Sidebar width (200px) + 20px spacing */
+  width: calc(100% - 220px);
+  transition: margin-left 0.3s, width 0.3s;
+}
+
+.sidebar.collapsed + .main-content {
+  margin-left: 80px; /* Sidebar width (60px) + 20px spacing */
+  width: calc(100% - 80px);
+}
+
+/* Adjust container styles */
+.container {
+  width: 90%;
+  max-width: 1000px;
+  margin: 50px auto;
+  padding: 0 20px;
+}
+
+/* Adjust logout button position */
+.logout-btn {
+  position: relative;
+  top: auto;
+  right: auto;
+  margin-left: auto;
 }
